@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+	<script src='../vendor/three/build/three-min.js'></script>
+	<script src='../vendor/require/require.js'></script>
+	<body style='margin: -100px 0 0 50px; background-color: #CCCCCC; overflow: hidden;'>
+		<script>
+			require([ '../package.require.js'
+				], function(){
+				var renderer	= new THREE.WebGLRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+				var onRenderFcts= [];
+				var scene	= new THREE.Scene();
+				var camera	= new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 800);
+				camera.position.z = 5;
+
+				// Ajout du texte sur l'image
+				var mesh	= new THREEx.Text('LEAP')
+				mesh.scale.multiplyScalar(1/2)
+				mesh.position.y	= +0.6
+				scene.add(mesh)
+				var mesh	= new THREEx.Text('SIGNING')
+				mesh.scale.multiplyScalar(1/2)
+				scene.add(mesh)
+				var mesh	= new THREEx.Text('MOTION')
+				mesh.scale.multiplyScalar(1/2)
+				mesh.position.y	= -0.6
+				scene.add(mesh)
+
+				// Camera controls
+				var mouse	= {x : 0, y : 0}
+				document.addEventListener('mousemove', function(event){
+					mouse.x	= (event.clientX / window.innerWidth ) - 0.5
+					mouse.y	= (event.clientY / window.innerHeight) - 0.5
+				}, false)
+				onRenderFcts.push(function(delta, now){
+					camera.position.x += (mouse.x*5 - camera.position.x) * (delta*3)
+					camera.position.y += (mouse.y*5 - camera.position.y) * (delta*3)
+					camera.lookAt( scene.position )
+				})
+
+				onRenderFcts.push(function(){
+					renderer.render( scene, camera );
+				})
+				var lastTimeMsec= null
+				requestAnimationFrame(function animate(nowMsec){
+
+					requestAnimationFrame( animate );
+					// Mesurer le temps
+					lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
+					var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
+					lastTimeMsec	= nowMsec
+					// Appel chaque MAJ de fonction
+					onRenderFcts.forEach(function(onRenderFct){
+						onRenderFct(deltaMsec/1000, nowMsec/1000)
+					})
+				})
+			})
+		</script>
+	</body>
+		<div>
+			<a style="margin: 562px 0 0 680px; position: absolute;" href="index.html">
+				<img src="../img/go_fondTransparent.png" alt="test"/>
+			</a>
+			<p style="margin: 810px 0 0 680px; position: absolute">&copy; 2016 Leap Signing Motion</p>
+		</div>
+</html>
